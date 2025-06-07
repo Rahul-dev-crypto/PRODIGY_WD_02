@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stopwatch</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="container">
+    <div class="watch">
+      <div class="outer-circle">
+        <div class="inner-circle">
+          <span class="text minute">0 :</span>
+          <span class="text sec">&nbsp; 0 :</span>
+          <span class="text msec">&nbsp; 0</span>
+        </div>
+      </div>
+      <div class="button-wrapper center">
+        <button class="button reset hidden">Reset</button>
+        <button class="button play">Play</button>
+        <button class="button lap hidden">Lap</button>
+      </div>
+    </div>
+    <ul class="laps">
+      <button class="lap-clear hidden">Clear All</button>
+    </ul>
+  </div>
+
+ <audio id="click-sound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3" preload="auto"></audio>
+
+
+  <script>
+    const playButton = document.querySelector(".play");
+    const resetButton = document.querySelector(".reset");
+    const clearButton = document.querySelector(".lap-clear");
+    const lapButton = document.querySelector(".lap");
+    const second = document.querySelector(".sec");
+    const minute = document.querySelector(".minute");
+    const centisecond = document.querySelector(".msec");
+    const laps = document.querySelector(".laps");
+    const bg = document.querySelector(".outer-circle");
+    const buttonWrapper = document.querySelector(".button-wrapper");
+    const clickSound = document.getElementById("click-sound");
+
+    let isPlay = false;
+    let centiInterval;
+    let minuteCounter = 0, secCounter = 0, centiCounter = 0;
+
+    const playClickSound = () => {
+      clickSound.currentTime = 0;
+      clickSound.play();
+    };
+
+    const updateDisplay = () => {
+      minute.innerHTML = `${minuteCounter} :`;
+      second.innerHTML = `&nbsp;${secCounter} :`;
+      centisecond.innerHTML = `&nbsp;${centiCounter}`;
+    };
+
+    const startTimer = () => {
+      centiInterval = setInterval(() => {
+        centiCounter++;
+        if (centiCounter === 100) {
+          centiCounter = 0;
+          secCounter++;
+        }
+        if (secCounter === 60) {
+          secCounter = 0;
+          minuteCounter++;
+        }
+        updateDisplay();
+      }, 10);
+    };
+
+    const stopTimer = () => {
+      clearInterval(centiInterval);
+    };
+
+    const play = () => {
+      playClickSound();
+      if (!isPlay) {
+        playButton.innerHTML = "Pause";
+        startTimer();
+        bg.classList.add("animation-bg");
+        lapButton.classList.remove("hidden");
+        resetButton.classList.remove("hidden");
+        buttonWrapper.classList.remove("center");
+        isPlay = true;
+      } else {
+        playButton.innerHTML = "Play";
+        stopTimer();
+        isPlay = false;
+        bg.classList.remove("animation-bg");
+      }
+    };
+
+    const reset = () => {
+  playClickSound();
+
+  lapButton.classList.add("hidden");
+  resetButton.classList.add("hidden");
+  buttonWrapper.classList.add("center");
+
+  stopTimer();
+  isPlay = false;
+
+  minuteCounter = 0;
+  secCounter = 0;
+  centiCounter = 0;
+  updateDisplay();
+  playButton.innerHTML = "Play";
+  bg.classList.remove("animation-bg");
+};
+
+
+    const lap = () => {
+      playClickSound();
+      const li = document.createElement("li");
+      li.className = "lap-item";
+
+      const number = document.createElement("span");
+      number.className = "number";
+      number.innerText = `#${laps.querySelectorAll(".lap-item").length + 1}`;
+
+      const timeStamp = document.createElement("span");
+      timeStamp.className = "time-stamp";
+      timeStamp.innerText = `${minuteCounter} : ${secCounter} : ${centiCounter}`;
+
+      li.append(number, timeStamp);
+      laps.insertBefore(li, clearButton);
+      clearButton.classList.remove("hidden");
+    };
+
+    const clearAll = () => {
+      playClickSound();
+      document.querySelectorAll(".lap-item").forEach(item => item.remove());
+      clearButton.classList.add("hidden");
+    };
+
+    playButton.addEventListener("click", play);
+    resetButton.addEventListener("click", reset);
+    lapButton.addEventListener("click", lap);
+    clearButton.addEventListener("click", clearAll);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      buttonWrapper.classList.add("center");
+    });
+  </script>
+</body>
+</html>
